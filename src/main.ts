@@ -6,7 +6,7 @@ let db;
 
 connectToDb((err)=>{
     if(!err){
-        bootstrap();
+        bootstrap();  // ЗАПУСК ПРИЛОЖЕНИЯ!!!
         db = getDb();
         err? console.log(err):console.log(`listen port 3000`)
     }else {
@@ -18,4 +18,4 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await app.listen(3000);
 }
-// bootstrap();
+
