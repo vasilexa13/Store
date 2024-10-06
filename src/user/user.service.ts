@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { getDb } from "../database/db";
 import { ObjectId } from "mongodb";
 import { UserDto } from "./user.dto";
+import {hashPassword} from "../security/hash-function";
 
 
 @Injectable()
@@ -56,11 +57,11 @@ export class UserService {
             console.log(`User with this email ${dto.email} already exists`);
         }
 
-        const userData = ({
+        const userData:UserDto = ({
             email: dto.email,
             token: dto.token,//будет JWT token
-            dataCreate: dto.dataCreate,//будет время создания
-            password: dto.password,//будет хэш пароля
+            dataCreate: new Date().toISOString(),
+            password:await hashPassword(dto.password),
             accessLevel: dto.accessLevel// пока незнаю откуда брать
         })
         try{
@@ -81,16 +82,16 @@ export class UserService {
             throw new Error(`User with this id ${id} does not exist`);
         }
 
-        const updatedUserData = {
-            email: dto.email,
-            token: dto.token, // будет JWT token
-            dataCreate: dto.dataCreate, // будет время создания
-            password: dto.password, // будет хэш пароля
-            accessLevel: dto.accessLevel // пока незнаю откуда брать
-        };
+
+        const updatedUserData:UserDto = {
+            email: dto.email ? dto.email : existUser.email,
+            token: dto.token ? dto.token : existUser.token,
+            dataCreate: dto.dataCreate ? dto.dataCreate : existUser.dataCreate,
+            password: dto.password ? dto.password : existUser.password,
+            accessLevel: dto.accessLevel ? dto.accessLevel : existUser.accessLevel
+        };//не работает
 
         try {
-            // const result = await this.db.collection("users").updateOne({ _id: existUser._id }, { $set: updatedUserData });
             const result = await this.db.collection("users").updateOne({ _id: userId }, { $set: updatedUserData });
             return result;
         } catch (error) {
