@@ -9,14 +9,18 @@ import { UserDto } from "./user.dto";
 export class UserService {
     private db: any;
 
+    private async initializeDb() {
+        this.db = await getDb();
+    }
+
     async getUsers() {
-        this.db = getDb();
+        await this.initializeDb();
         const users = await this.db.collection('users').find({}).toArray();
         return users;
     }
 
     async getUserById(id: string) {
-        this.db = getDb();
+        await this.initializeDb();
         try {
             const userId = new ObjectId(id); // Преобразуем строку в ObjectId
             const user = await this.db.collection('users').findOne({ _id: userId });
@@ -30,7 +34,7 @@ export class UserService {
     }
 
     async deleteUserById(id: string) {
-        this.db = getDb();
+        await this.initializeDb();
         try {
             const userId = new ObjectId(id); // Преобразуем строку в ObjectId
             const result = await this.db.collection('users').deleteOne({ _id: userId });
@@ -46,6 +50,51 @@ export class UserService {
     }
 
     async createDto(dto: UserDto){
+        await this.initializeDb();
+        const existingUser = await this.db.collection('users').findOne({ email: dto.email });
+        if (existingUser) {
+            console.log(`User with this email ${dto.email} already exists`);
+        }
 
+        const userData = ({
+            email: dto.email,
+            token: dto.token,//будет JWT token
+            dataCreate: dto.dataCreate,//будет время создания
+            password: dto.password,//будет хэш пароля
+            accessLevel: dto.accessLevel// пока незнаю откуда брать
+        })
+        try{
+            const result = await this.db.collection('users').insertOne(userData);
+            return result;
+        }catch (error){
+            throw new Error('Database error occurred while creating user');
+        }
+    }
+
+    async updateDto(id, dto) {
+        await this.initializeDb();
+        const userId = new ObjectId(id); // Преобразуем строку в ObjectId
+
+        const existUser = await this.db.collection('users').find(userId);
+
+        if (!existUser) {
+            throw new Error(`User with this id ${id} does not exist`);
+        }
+
+        const updatedUserData = {
+            email: dto.email,
+            token: dto.token, // будет JWT token
+            dataCreate: dto.dataCreate, // будет время создания
+            password: dto.password, // будет хэш пароля
+            accessLevel: dto.accessLevel // пока незнаю откуда брать
+        };
+
+        try {
+            // const result = await this.db.collection("users").updateOne({ _id: existUser._id }, { $set: updatedUserData });
+            const result = await this.db.collection("users").updateOne({ _id: userId }, { $set: updatedUserData });
+            return result;
+        } catch (error) {
+            throw new Error("Database Error occurred while updating user");
+        }
     }
 }
