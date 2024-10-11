@@ -5,9 +5,11 @@ import { ObjectId } from "mongodb";
 import { UserDto } from "./user.dto";
 import {hashPassword} from "../security/hash-function";
 
-
 @Injectable()
 export class UserService {
+    findOne(userName: string) {
+        throw new Error('Method not implemented.');
+    }
     private db: any;
 
     private async initializeDb() {
@@ -50,7 +52,7 @@ export class UserService {
         }
     }
 
-    async createDto(dto: UserDto){
+    async createDto(dto: UserDto) {
         await this.initializeDb();
         const existingUser = await this.db.collection('users').findOne({ email: dto.email });
         if (existingUser) {
@@ -62,7 +64,8 @@ export class UserService {
             token: dto.token,//будет JWT token
             dataCreate: new Date().toISOString(),
             password:await hashPassword(dto.password),
-            accessLevel: dto.accessLevel// пока незнаю откуда брать
+            accessLevel: dto.accessLevel,
+            userName: dto.userName
         })
         try{
             const result = await this.db.collection('users').insertOne(userData);
@@ -88,7 +91,8 @@ export class UserService {
             token: dto.token ? dto.token : existUser.token,
             dataCreate: dto.dataCreate ? dto.dataCreate : existUser.dataCreate,
             password: dto.password ? dto.password : existUser.password,
-            accessLevel: dto.accessLevel ? dto.accessLevel : existUser.accessLevel
+            accessLevel: dto.accessLevel ? dto.accessLevel : existUser.accessLevel,
+            userName: dto.userName ? dto.userName : existUser.userName
         };//не работает
 
         try {
@@ -98,4 +102,4 @@ export class UserService {
             throw new Error("Database Error occurred while updating user");
         }
     }
-}
+  }

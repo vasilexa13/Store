@@ -29,6 +29,11 @@ export class UserDto {
     @MinLength(6, { message: 'Password must be at least 6 characters long' })
     password: string;
 
+    @IsString()
+    @IsNotEmpty({ message: 'userName is required' })
+    @MinLength(3, { message: 'userName must be at least 3 characters long' })
+    userName: string;
+
     @IsIn(['admin', 'guest'], { message: 'accessLevel must be either "admin" or "guest"' })
     accessLevel: string;
 }
