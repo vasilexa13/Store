@@ -1,17 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { UserService } from "../user/user.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
 import { getDb } from "../database/db";
-import {ObjectId} from "mongodb";
+import {UserDto} from "../user/user.dto";
 
 class User {
 }
 
 @Injectable()
 export class AuthService {
+    findOne(userName: string) {
+        throw new Error('Method not implemented.');
+    }
     private db: any;
-    userModel: any;
+    // userModel: any;
 
     constructor(
         private userService: UserService,
@@ -20,32 +23,32 @@ export class AuthService {
         this.db = getDb();
     }
 
-
-    async validateUser(username: string, password?: string): Promise<any> {
-        const user = await this.db.collection('users').findOne(username);
-        console.log('Found user:', user);
-
-        if (user && (password!=null || password != undefined)) {
-            const match = await bcrypt.compare(password, user.password);//НАДО РАЗОБРАТЬСЯ
-            console.log('Password match:', match);
-            if (match) {
-                return user;
-            }
+    async validateUser(email:string): Promise<any> {
+        const user = await this.db.collection('users').findOne({email: email});
+        if (user){
+            throw new HttpException(`User with email: ${email} already exist`, HttpStatus.UNAUTHORIZED);
+        }else {
+            return user;
         }
-        return null;
     }
 
-     async login(user: any) {
-        const userId = new ObjectId(user.id);
-        const payload = { username: user.username, sub: userId };
-        return {
-            access_token: this.jwtService.sign(payload),
+    //  async login(user: any) {
+    //     const userId = new ObjectId(user.id);
+    //     const payload = { username: user.username, sub: userId };
+    //     return {
+    //         access_token: this.jwtService.sign(payload),
+    //     };
+    // }
+
+    async register(dto:UserDto): Promise<User> {
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const newUser = {
+            email: dto.email,
+            password: hashedPassword,
+            userName: dto.userName,
+            accessLevel: dto.accessLevel||"guest",
+            dataCreate: new Date().toISOString()
         };
-    }
-
-    async register(username: string, password: string): Promise<User> {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new this.userModel({ username, password: hashedPassword });
-        return newUser.save();
+        return this.db.collection('users').insertOne(newUser);
     }
 }

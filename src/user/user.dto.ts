@@ -35,5 +35,6 @@ export class UserDto {
     userName: string;
 
     @IsIn(['admin', 'guest'], { message: 'accessLevel must be either "admin" or "guest"' })
-    accessLevel: string;
+    @IsOptional()
+    accessLevel?: string;
 }
