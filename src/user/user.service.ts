@@ -10,6 +10,7 @@ export class UserService {
     findOne(userName: string) {
         throw new Error('Method not implemented.');
     }
+
     private db: any;
 
     private async initializeDb() {
@@ -26,7 +27,7 @@ export class UserService {
         await this.initializeDb();
         try {
             const userId = new ObjectId(id); // Преобразуем строку в ObjectId
-            const user = await this.db.collection('users').findOne({ _id: userId });
+            const user = await this.db.collection('users').findOne({_id: userId});
             if (!user) {
                 throw new NotFoundException(`User with ID ${id} not found`);
             }
@@ -40,13 +41,13 @@ export class UserService {
         await this.initializeDb();
         try {
             const userId = new ObjectId(id); // Преобразуем строку в ObjectId
-            const result = await this.db.collection('users').deleteOne({ _id: userId });
+            const result = await this.db.collection('users').deleteOne({_id: userId});
 
             if (result.deletedCount === 0) {
                 throw new NotFoundException(`User with ID ${id} not found`);
             }
 
-            return { message: `User with ID ${id} successfully deleted` }; // Возвращаем сообщение об успешном удалении
+            return {message: `User with ID ${id} successfully deleted`}; // Возвращаем сообщение об успешном удалении
         } catch (error) {
             throw new NotFoundException(`User with ID ${id} is not valid or does not exist.`);
         }
@@ -54,23 +55,23 @@ export class UserService {
 
     async createDto(dto: UserDto) {
         await this.initializeDb();
-        const existingUser = await this.db.collection('users').findOne({ email: dto.email });
+        const existingUser = await this.db.collection('users').findOne({email: dto.email});
         if (existingUser) {
             console.log(`User with this email ${dto.email} already exists`);
         }
 
-        const userData:UserDto = ({
+        const userData: UserDto = ({
             email: dto.email,
             token: dto.token,//будет JWT token
             dataCreate: new Date().toISOString(),
-            password:await hashPassword(dto.password),
+            password: await hashPassword(dto.password),
             accessLevel: dto.accessLevel,
             userName: dto.userName
         })
-        try{
+        try {
             const result = await this.db.collection('users').insertOne(userData);
             return result;
-        }catch (error){
+        } catch (error) {
             throw new Error('Database error occurred while creating user');
         }
     }
@@ -86,7 +87,7 @@ export class UserService {
         }
 
 
-        const updatedUserData:UserDto = {
+        const updatedUserData: UserDto = {
             email: dto.email ? dto.email : existUser.email,
             token: dto.token ? dto.token : existUser.token,
             dataCreate: dto.dataCreate ? dto.dataCreate : existUser.dataCreate,
@@ -96,10 +97,17 @@ export class UserService {
         };//не работает
 
         try {
-            const result = await this.db.collection("users").updateOne({ _id: userId }, { $set: updatedUserData });
+            const result = await this.db.collection("users").updateOne({_id: userId}, {$set: updatedUserData});
             return result;
         } catch (error) {
             throw new Error("Database Error occurred while updating user");
         }
     }
-  }
+
+    async find(email: string){
+        await this.initializeDb();
+        return this.db.collection("users").findOne({where: {email: email}});
+    }
+
+
+}

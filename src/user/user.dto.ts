@@ -36,5 +36,5 @@ export class UserDto {
 
     @IsIn(['admin', 'guest'], { message: 'accessLevel must be either "admin" or "guest"' })
     @IsOptional()
-    accessLevel?: string;
+    accessLevel?: string;// для admin использовать другой путь регистрации
 }

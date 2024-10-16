@@ -4,16 +4,23 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { getDb } from '../database/db';
+import * as process from "node:process";
+import {UserModule} from "../user/user.module";
+import {PassportModule} from "@nestjs/passport";
+import {LocalStrategy} from "./local.strategy";
 
 
 @Module({
   imports: [
+      //  надо вынести JWT из AUTH.MODULE
     JwtModule.register({
-      secret: 'cookie', // Замените на ваш секрет
-      signOptions: { expiresIn: '1000s' }, // Установите время действия токена
+      secret: "cookies_tasty",
+      // secret: process.env.JVT_SECRET,
+      signOptions: { expiresIn: '1h' }, // Установка времени действия токена
     }),
+    UserModule,PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService],
+  providers: [AuthService, UserService, LocalStrategy],
 })
 export class AuthModule {}

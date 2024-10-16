@@ -1,4 +1,4 @@
-import {HttpException, HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { UserService } from "../user/user.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
@@ -22,13 +22,25 @@ export class AuthService {
     ) {
         this.db = getDb();
     }
+    // //..РАБОЧАЯ ВЕРСИЯ
+    // async validateUser(email:string): Promise<any> {
+    //     const user = await this.db.collection('users').findOne({email: email});
+    //     if (user){
+    //         throw new HttpException(`User with email: ${email} already exist`, HttpStatus.UNAUTHORIZED);
+    //     }else {
+    //         return user;
+    //     }
+    // }
 
-    async validateUser(email:string): Promise<any> {
+    // ТЕСТ НОВОЙ ВАЛИДАЦИИ С ПАРОЛЕМ
+    async validateUser(email:string, password:string) {
         const user = await this.db.collection('users').findOne({email: email});
-        if (user){
-            throw new HttpException(`User with email: ${email} already exist`, HttpStatus.UNAUTHORIZED);
-        }else {
+        const passwordIsMatch  = await bcrypt.compare(password,user.password );
+
+        if (user&&passwordIsMatch){
             return user;
+        }else {
+            throw new BadRequestException(`User with email ${email} not found or password is incorrect`);
         }
     }
 
