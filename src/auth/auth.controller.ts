@@ -13,7 +13,7 @@ export class AuthController {
     @Post('register')
     async register(@Body() dto:UserDto) {
         // Проверяем существует ли уже пользователь
-        const existingEmail = await this.authService.validateUser(dto.email , dto.password);
+        const existingEmail = await this.authService.validateUser(dto.email );
         // if (existingEmail) {
         //     throw new HttpException(`User with ${dto.email} already exists.`, HttpStatus.CONFLICT);
         // }

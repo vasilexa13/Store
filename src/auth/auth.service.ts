@@ -23,26 +23,26 @@ export class AuthService {
         this.db = getDb();
     }
     // //..РАБОЧАЯ ВЕРСИЯ
-    // async validateUser(email:string): Promise<any> {
-    //     const user = await this.db.collection('users').findOne({email: email});
-    //     if (user){
-    //         throw new HttpException(`User with email: ${email} already exist`, HttpStatus.UNAUTHORIZED);
-    //     }else {
-    //         return user;
-    //     }
-    // }
-
-    // ТЕСТ НОВОЙ ВАЛИДАЦИИ С ПАРОЛЕМ
-    async validateUser(email:string, password:string) {
+    async validateUser(email:string): Promise<any> {
         const user = await this.db.collection('users').findOne({email: email});
-        const passwordIsMatch  = await bcrypt.compare(password,user.password );
-
-        if (user&&passwordIsMatch){
-            return user;
+        if (user){
+            throw new HttpException(`User with email: ${email} already exist`, HttpStatus.UNAUTHORIZED);
         }else {
-            throw new BadRequestException(`User with email ${email} not found or password is incorrect`);
+            return user;
         }
     }
+
+    // // ТЕСТ НОВОЙ ВАЛИДАЦИИ С ПАРОЛЕМ
+    // async validateUser(email:string, password:string) {
+    //     const user = await this.db.collection('users').findOne({email: email});
+    //     const passwordIsMatch  = await bcrypt.compare(password,user.password );
+    //
+    //     if (user&&passwordIsMatch){
+    //         return user;
+    //     }else {
+    //         throw new BadRequestException(`User with email ${email} not found or password is incorrect`);
+    //     }
+    // }
 
     //  async login(user: any) {
     //     const userId = new ObjectId(user.id);
