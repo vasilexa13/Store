@@ -30,9 +30,17 @@ export class AuthController {
 
     @Post('login')
     @UseGuards(AuthGuard('local'))
-    async login(@Request() req) {
-
-        return req.user;
+    // async login(@Request() req) {
+    //
+    //     return req.user;
+    // }
+    async login(@Body() dto:UserDto) {
+        const existingUser = await this.authService.checkUser(dto.email, dto.password);
+        if (existingUser) {
+            return { message: `COME IN  User id ${new ObjectId()} and password exist in BD.` };
+        } else {
+            throw new HttpException("WRONG email or password WRONG ", HttpStatus.UNAUTHORIZED);
+        }
     }
 
 }

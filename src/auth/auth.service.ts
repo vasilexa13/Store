@@ -22,7 +22,7 @@ export class AuthService {
     ) {
         this.db = getDb();
     }
-    // //..РАБОЧАЯ ВЕРСИЯ
+    //..РАБОЧАЯ ВЕРСИЯ
     async validateUser(email:string): Promise<any> {
         const user = await this.db.collection('users').findOne({email: email});
         if (user){
@@ -32,25 +32,22 @@ export class AuthService {
         }
     }
 
-    // // ТЕСТ НОВОЙ ВАЛИДАЦИИ С ПАРОЛЕМ
-    // async validateUser(email:string, password:string) {
-    //     const user = await this.db.collection('users').findOne({email: email});
-    //     const passwordIsMatch  = await bcrypt.compare(password,user.password );
-    //
-    //     if (user&&passwordIsMatch){
-    //         return user;
-    //     }else {
-    //         throw new BadRequestException(`User with email ${email} not found or password is incorrect`);
-    //     }
-    // }
+    // ТЕСТ ВАЛИДАЦИИ С ПАРОЛЕМ и email пользователя
+    async checkUser(email:string, password:string) {
 
-    //  async login(user: any) {
-    //     const userId = new ObjectId(user.id);
-    //     const payload = { username: user.username, sub: userId };
-    //     return {
-    //         access_token: this.jwtService.sign(payload),
-    //     };
-    // }
+        const user = await this.db.collection('users').findOne({email: email});
+        if (!user){
+            throw new BadRequestException(` EMAIL ${email} incorrect`.toUpperCase());
+        }
+
+        const passwordIsMatch  = await bcrypt.compare(password,user.password );
+
+        if (user&&passwordIsMatch){
+            return user;
+        }else {
+            throw new BadRequestException(` User with email ${email} not found or password is incorrect`);
+        }
+    }
 
     async register(dto:UserDto): Promise<User> {
         const hashedPassword = await bcrypt.hash(dto.password, 10);
