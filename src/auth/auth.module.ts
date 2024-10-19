@@ -14,9 +14,9 @@ import {LocalStrategy} from "./local.strategy";
   imports: [
       //  надо вынести JWT из AUTH.MODULE
     JwtModule.register({
-      secret: "cookies_tasty",
+      secret: process.env.JVT_SECRET,
       // secret: process.env.JVT_SECRET,
-      signOptions: { expiresIn: '1h' }, // Установка времени действия токена
+      signOptions: { expiresIn: '30d' }, // Установка времени действия токена
     }),
     UserModule,PassportModule,
   ],

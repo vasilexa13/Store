@@ -4,6 +4,8 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
 import { getDb } from "../database/db";
 import {UserDto} from "../user/user.dto";
+import {ObjectId} from "mongodb";
+import {IUser} from "../types/types";
 
 class User {
 }
@@ -18,7 +20,7 @@ export class AuthService {
 
     constructor(
         private userService: UserService,
-        private jwtService: JwtService
+        private readonly jwtService: JwtService
     ) {
         this.db = getDb();
     }
@@ -58,6 +60,24 @@ export class AuthService {
             accessLevel: dto.accessLevel||"guest",
             dataCreate: new Date().toISOString()
         };
+        // ДЛЯ JWT ТОКЕНА
+        // const payload = { username: dto.email, sub: new ObjectId() };
+        // return {
+        //     access_token: this.jwtService.sign(payload),
+        // };
         return this.db.collection('users').insertOne(newUser);
     }
+
+    async generateToken(user: IUser) {
+        const { email, id   } = user;
+        return {
+            id,
+            email,
+                token: this.jwtService.sign({
+                id:id,
+                email:email,
+            })
+        }
+    }
+
 }
