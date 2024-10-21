@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 
 export class UserDto {
+
     @IsEmail({}, { message: 'Invalid email format' })
     @MaxLength(50, { message: 'Email must be at most 50 characters long' })
     email: string;
@@ -37,4 +38,7 @@ export class UserDto {
     @IsIn(['admin', 'guest'], { message: 'accessLevel must be either "admin" or "guest"' })
     @IsOptional()
     accessLevel?: string;// для admin использовать другой путь регистрации
+
+
+    _id?:string
 }

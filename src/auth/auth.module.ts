@@ -8,6 +8,7 @@ import * as process from "node:process";
 import {UserModule} from "../user/user.module";
 import {PassportModule} from "@nestjs/passport";
 import {LocalStrategy} from "./local.strategy";
+import {JwtStrategy} from "./jwt-strategy";
 
 
 @Module({
@@ -16,11 +17,11 @@ import {LocalStrategy} from "./local.strategy";
     JwtModule.register({
       secret: process.env.JVT_SECRET,
       // secret: process.env.JVT_SECRET,
-      signOptions: { expiresIn: '30d' }, // Установка времени действия токена
+      signOptions: { expiresIn: '1d' }, // Установка времени действия токена
     }),
     UserModule,PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, LocalStrategy],
+  providers: [AuthService, UserService, LocalStrategy , JwtStrategy],
 })
 export class AuthModule {}

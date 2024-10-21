@@ -8,6 +8,8 @@ import {ObjectId} from "mongodb";
 import {IUser} from "../types/types";
 
 class User {
+    _id: string;
+    dto: any;
 }
 
 @Injectable()
@@ -16,7 +18,7 @@ export class AuthService {
         throw new Error('Method not implemented.');
     }
     private db: any;
-    // userModel: any;
+    private id: string;
 
     constructor(
         private userService: UserService,
@@ -24,19 +26,16 @@ export class AuthService {
     ) {
         this.db = getDb();
     }
-    //..РАБОЧАЯ ВЕРСИЯ
     async validateUser(email:string): Promise<any> {
         const user = await this.db.collection('users').findOne({email: email});
         if (user){
-            throw new HttpException(`User with email: ${email} already exist`, HttpStatus.UNAUTHORIZED);
+            throw new Error(`User with email: ${email} already exist`);
         }else {
             return user;
         }
     }
 
-    // ТЕСТ ВАЛИДАЦИИ С ПАРОЛЕМ и email пользователя
     async checkUser(email:string, password:string) {
-
         const user = await this.db.collection('users').findOne({email: email});
         if (!user){
             throw new BadRequestException(` EMAIL ${email} incorrect`.toUpperCase());
@@ -51,33 +50,34 @@ export class AuthService {
         }
     }
 
-    async register(dto:UserDto): Promise<User> {
+    async register(dto:UserDto) {
+    // async register(dto:UserDto): Promise<User> {
         const hashedPassword = await bcrypt.hash(dto.password, 10);
         const newUser = {
+            _id: new ObjectId(this.id),
             email: dto.email,
             password: hashedPassword,
             userName: dto.userName,
             accessLevel: dto.accessLevel||"guest",
             dataCreate: new Date().toISOString()
         };
-        // ДЛЯ JWT ТОКЕНА
-        // const payload = { username: dto.email, sub: new ObjectId() };
-        // return {
-        //     access_token: this.jwtService.sign(payload),
-        // };
-        return this.db.collection('users').insertOne(newUser);
+        const user = await this.db.collection("users").insertOne(newUser);
+        //
+        // const token = this.jwtService.sign(newUser.email);
+        // return {user : User, token : token};
+
+        return (newUser);
     }
 
     async generateToken(user: IUser) {
-        const { email, id   } = user;
+        const { email, _id   } = user;
         return {
-            id,
-            email,
+            _id,
+            email,// ВЫДАЮ EMAIL ПРОСТО ДЛЯ ВИЗУАЛИЗАЦИИ
                 token: this.jwtService.sign({
-                id:id,
+                id:_id,
                 email:email,
             })
         }
     }
-
 }
