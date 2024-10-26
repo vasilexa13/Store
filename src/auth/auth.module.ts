@@ -15,7 +15,7 @@ import {ProfileController} from "../profile/profile.controller";
   imports: [
     JwtModule.register({
       secret: process.env.JVT_SECRET,
-      signOptions: { expiresIn: '1d' }, // Установка времени действия токена
+      signOptions: { expiresIn: '60s' }, // Установка времени действия токена
     }),
     UserModule,PassportModule,
   ],

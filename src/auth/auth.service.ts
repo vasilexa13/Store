@@ -109,4 +109,8 @@ export class AuthService {
         }
     }
 
+    async validateToken(userId: string, token: string) {
+        const user = await this.db.collection('users').findOne({_id: new ObjectId(userId.toString())});
+        console.log(user._id);
+    }
 }
