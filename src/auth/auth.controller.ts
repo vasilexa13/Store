@@ -48,10 +48,8 @@ export class AuthController {
 
 
     // ПУТЬ КОТОРЫЙ ЗАЩИЩАЕМ JWT_GUARD
-    // @UseGuards(JwtAuthGuard)
-    // @Get('profile')
-    // getProfile(@Request() req) {
-    //
-    //     return req.user;
-    // }
+    @UseGuards(JwtAuthGuard)
+    getProfile(@Request() req) {
+        return req.user;
+    }
 }
