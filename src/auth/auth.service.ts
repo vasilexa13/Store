@@ -6,6 +6,7 @@ import { getDb } from "../database/db";
 import {UserDto} from "../user/user.dto";
 import {ObjectId} from "mongodb";
 import {IUser} from "../types/types";
+import {request} from "express";
 
 class User {
     _id: string;
@@ -69,15 +70,43 @@ export class AuthService {
         return (newUser);
     }
 
-    async generateToken(user: IUser) {
-        const { email, _id   } = user;
+    async generateAccessToken(user: IUser) {
+
+        const { email, _id  } = user;
         return {
             _id,
             email,// ВЫДАЮ EMAIL ПРОСТО ДЛЯ ВИЗУАЛИЗАЦИИ
                 token: this.jwtService.sign({
-                id:_id,
-                email:email,
+                    id:_id,
+                    email:email,
             })
         }
     }
+
+    async generateRefreshToken(_id:string) {
+        const id   = _id;
+        return {
+            id:id,
+            refreshToken: this.jwtService.sign({
+                id:id,
+            }, { expiresIn: '15d' })
+        } ;
+    }
+
+    async saveToken(userId: string, token: string) {
+        try {
+            // Обновляем токен пользователя, если он существует, или создаем нового пользователя
+            const result = await this.db.collection('users').updateOne(
+                { _id: new ObjectId(userId.toString()) },
+                { $set: { refreshToken: token } }, // Сохраняем refreshToken
+                { upsert: true } // Если документа с указанным id нет, создаем новый
+            );
+
+            return result;
+        } catch (error) {
+            console.error("Error saving token:", error);
+            throw new Error("Error saving token");
+        }
+    }
+
 }

@@ -1,8 +1,9 @@
-import {Controller, Post, Body, HttpException, HttpStatus, UseGuards, Request, Get} from '@nestjs/common';
+import {Controller, Post, Body, HttpException, HttpStatus, UseGuards, Request, Get, Req} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {UserDto} from "../user/user.dto";
 import {LocalAuthGuard} from "./local-auth.guard";
 import {JwtAuthGuard} from "./jwt-auth.guard";
+import {request} from "express";
 
 @Controller('auth')
 export class AuthController {
@@ -20,8 +21,9 @@ export class AuthController {
         const newUser = await this.authService.register(dto);
         if (newUser) {
             // ВЫДАЮ TOKEN
-            const token =  await this.authService.generateToken(dto)
-            return token;
+            const token =  await this.authService.generateAccessToken(dto)
+            const refreshToken = await this.authService.generateRefreshToken(newUser._id.toString())
+            return {token , refreshToken};
         } else {
             throw new HttpException('User NOT created', HttpStatus.INTERNAL_SERVER_ERROR);        }
     }
@@ -30,8 +32,15 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     async login(@Body() dto:UserDto) {
         const existingUser = await this.authService.checkUser(dto.email, dto.password);
+
         if (existingUser) {
-            return this.authService.generateToken(existingUser)
+            const accessToken = await this.authService.generateAccessToken(dto);
+            const refreshToken = await this.authService.generateRefreshToken(existingUser._id.toString())
+
+            // await
+            await this.authService.saveToken(existingUser._id.toString(), refreshToken.refreshToken );
+
+            return {accessToken, refreshToken};
         } else {
             throw new HttpException("WRONG email or password WRONG ", HttpStatus.UNAUTHORIZED);
         }
@@ -39,9 +48,10 @@ export class AuthController {
 
 
     // ПУТЬ КОТОРЫЙ ЗАЩИЩАЕМ JWT_GUARD
-    @UseGuards(JwtAuthGuard)
-    @Get('profile')
-    getProfile(@Request() req) {
-        return req.user;
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Get('profile')
+    // getProfile(@Request() req) {
+    //
+    //     return req.user;
+    // }
 }
