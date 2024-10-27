@@ -5,6 +5,6 @@ export declare enum SortBy{
     // EARLYHINTS = 103,
     rating= "rating",
     newest="newest",
-    cheapest="cheapest",
+    cheap="cheap",
     expensive="expensive",
 }
