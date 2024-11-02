@@ -5,19 +5,23 @@ import {LocalAuthGuard} from "../auth/local-auth.guard";
 
 @Controller('cart')
 export class CartController {
-  constructor(private readonly cartService: CartService) {
-  }
+  constructor(private readonly cartService: CartService) {}
 
   @Get()
-  async reciveAllData(){
+  async receiveAllData() {
     return this.cartService.allCartData();
   }
 
   @Post()
   // @UseGuards(JwtAuthGuard)
-  async writeCartData(@Body() body:{
-      _idUser:string ,_idItem:string , shop: string , itemQuantity:number}) {
-    return this.cartService.writeCartData(body._idUser , body._idItem , body.shop , body.itemQuantity);
+  async writeCartData(@Body() body: {
+    _idUser: string;
+    items: {
+      _idItem: string;
+      shopData: string;
+      itemQuantity: number;
+    }[];
+  }) {
+    return this.cartService.writeCartData(body._idUser, body.items);
   }
-
 }
