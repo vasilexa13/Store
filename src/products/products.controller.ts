@@ -15,6 +15,5 @@ export class ProductsController {
    const items =  this.productsService.findAll(itemGroup, sortBy);
    return items
   }
-  async
 
 }

@@ -65,7 +65,6 @@ export class ProductsService {
                 ]).toArray();
                 return products
             }
-
             else{
                 return await this.db.collection('products').find({'itemGroup': itemGroup.toString()}).toArray();
             }
