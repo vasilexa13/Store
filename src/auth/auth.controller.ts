@@ -45,14 +45,6 @@ export class AuthController {
         }
     }
 
-
-    // @Post('refresh-token')
-    // @UseGuards(JwtAuthGuard) // Защита маршрута
-    // async refreshToken(@Request() req, @Body() body: { refreshToken: string }) {
-    //     const userId = req.user.id;
-    //     return this.authService.generateRefreshToken((userId));
-    // }
-
     // ПУТЬ КОТОРЫЙ ЗАЩИЩАЕМ JWT_GUARD
     @UseGuards(JwtAuthGuard)
     getProfile(@Request() req) {
